@@ -3,7 +3,12 @@ import { Resend } from "resend";
 import { z } from "zod";
 import { siteConfig } from "@/lib/site-config";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy — avoids build-time crash when RESEND_API_KEY is not set
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY is not set.");
+  return new Resend(key);
+}
 
 const schema = z.object({
   name: z.string().min(2).max(100),
@@ -26,7 +31,7 @@ export async function POST(request: Request) {
 
     const { name, email, subject, message } = parsed.data;
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: `${siteConfig.name} Contact Form <noreply@${process.env.RESEND_DOMAIN ?? "nexuscommerce.com"}>`,
       to: siteConfig.adminEmail,
       replyTo: email,

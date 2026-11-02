@@ -1,8 +1,17 @@
 import { Resend } from "resend";
 import { siteConfig } from "@/lib/site-config";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = `${siteConfig.name} <noreply@${process.env.RESEND_DOMAIN ?? "nexuscommerce.com"}>`;
+// Lazy initialisation — only created at call time, not at module evaluation.
+// This prevents build-time errors when RESEND_API_KEY is not yet set.
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY environment variable is not set.");
+  return new Resend(key);
+}
+
+function getFrom() {
+  return `${siteConfig.name} <noreply@${process.env.RESEND_DOMAIN ?? "nexuscommerce.com"}>`;
+}
 
 export async function sendWelcomeEmail({
   fullName,
@@ -11,8 +20,8 @@ export async function sendWelcomeEmail({
   fullName: string;
   email: string;
 }) {
-  return resend.emails.send({
-    from: FROM,
+  return getResend().emails.send({
+    from: getFrom(),
     to: email,
     subject: `Welcome to ${siteConfig.name}!`,
     html: `
@@ -59,8 +68,8 @@ export async function sendAdminRegistrationAlert({
   mobileNumber: string;
   registeredAt: string;
 }) {
-  return resend.emails.send({
-    from: FROM,
+  return getResend().emails.send({
+    from: getFrom(),
     to: siteConfig.adminEmail,
     subject: `New User Registration – ${fullName}`,
     html: `
