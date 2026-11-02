@@ -67,8 +67,8 @@ export default function ContactSection() {
             <div className="space-y-5">
               {[
                 { icon: Mail, label: "Email Address", value: siteConfig.email, href: `mailto:${siteConfig.email}` },
-                { icon: Phone, label: "Phone Number", value: siteConfig.phone, href: `tel:${siteConfig.phone}` },
-                { icon: MapPin, label: "Office Address", value: siteConfig.address, href: undefined },
+                ...(siteConfig.phone ? [{ icon: Phone, label: "Phone Number", value: siteConfig.phone, href: `tel:${siteConfig.phone}` }] : []),
+                ...(siteConfig.address ? [{ icon: MapPin, label: "Office Address", value: siteConfig.address, href: undefined as string | undefined }] : []),
               ].map(({ icon: Icon, label, value, href }) => (
                 <div key={label} className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[hsl(var(--primary)/0.1)] flex items-center justify-center shrink-0">

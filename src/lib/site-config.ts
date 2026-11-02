@@ -1,30 +1,31 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  SITE CONFIGURATION  –  Edit this file to customise the business details.
+//  SITE CONFIGURATION
+//  All values fall back to env vars first, then sensible defaults.
+//  Set these in .env.local (local) or Vercel Environment Variables (production).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const siteConfig = {
   /** Business identity */
-  name: "Nexus Commerce",
-  tagline: "Premium Products. Trusted Quality.",
+  name: process.env.NEXT_PUBLIC_BUSINESS_NAME ?? "Nexus Commerce",
+  tagline: process.env.NEXT_PUBLIC_BUSINESS_TAGLINE ?? "Premium Products. Trusted Quality.",
   description:
-    "Nexus Commerce offers a curated selection of premium products designed for professionals and enthusiasts alike. Explore our catalogue and discover excellence in every item.",
-  shortDescription: "Your trusted partner for premium products.",
+    process.env.NEXT_PUBLIC_BUSINESS_DESCRIPTION ??
+    "Nexus Commerce offers a curated selection of premium products designed for professionals and enthusiasts alike.",
+  shortDescription:
+    process.env.NEXT_PUBLIC_BUSINESS_SHORT_DESC ?? "Your trusted partner for premium products.",
 
-  /** Contact details */
-  email: "contact@nexuscommerce.com",
-  phone: "+1 (555) 012-3456",
-  address: "123 Business Avenue, Commerce City, CA 90210, USA",
+  /** Contact details — set these in your environment variables */
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "contact@nexuscommerce.com",
+  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "",
+  address: process.env.NEXT_PUBLIC_CONTACT_ADDRESS ?? "",
 
-  /** Social media links */
+  /** Social media — set to empty string "" to hide a link */
   social: {
-    facebook: "https://facebook.com",
-    twitter: "https://twitter.com",
-    instagram: "https://instagram.com",
-    linkedin: "https://linkedin.com",
+    facebook:  process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK  ?? "",
+    twitter:   process.env.NEXT_PUBLIC_SOCIAL_TWITTER   ?? "",
+    instagram: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM ?? "",
+    linkedin:  process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN  ?? "",
   },
-
-  /** Brand */
-  primaryColor: "#2563EB", // blue-600
 
   /** Admin email for notifications */
   adminEmail: process.env.ADMIN_EMAIL ?? "admin@nexuscommerce.com",
