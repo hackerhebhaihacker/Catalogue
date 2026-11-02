@@ -1,43 +1,21 @@
 @import "tailwindcss";
 
+/* All design tokens as plain CSS variables — used by inline styles where needed */
 :root {
-  /* Brand palette */
   --primary: #2563eb;
-  --primary-foreground: #ffffff;
-  --secondary: #eff6ff;
-  --secondary-foreground: #1e3a8a;
-  --accent: #dbeafe;
-  --accent-foreground: #1e3a8a;
-
-  /* Surface */
+  --primary-dark: #1d4ed8;
   --background: #ffffff;
   --foreground: #0f172a;
-  --card: #ffffff;
-  --card-foreground: #0f172a;
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
-
-  /* Semantic */
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #2563eb;
-
-  /* Status */
+  --card: #ffffff;
   --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #22c55e;
-  --success-foreground: #ffffff;
-
   --radius: 0.5rem;
-
-  /* Font */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
-  border-color: var(--border);
   box-sizing: border-box;
 }
 
@@ -46,16 +24,14 @@ html {
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: #ffffff;
+  color: #0f172a;
   font-family: var(--font-sans);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--muted); }
+::-webkit-scrollbar-track { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #64748b; }
