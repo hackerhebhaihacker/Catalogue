@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/supabase/admin-guard";
+import { createAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { sendOrderStatusUpdateToCustomer } from "@/lib/email";
 
@@ -13,9 +14,12 @@ const schema = z.object({
 interface RouteParams { params: Promise<{ id: string }>; }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
-  const { error, supabase } = await requireAdmin();
+  // Auth check — verify admin role
+  const { error } = await requireAdmin();
   if (error) return error;
 
+  // Use service-role client for DB ops to bypass RLS
+  const adminDb = await createAdminClient();
   const { id } = await params;
 
   try {
@@ -25,15 +29,19 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
     }
 
-    // Fetch order before update to get customer info
-    const { data: existingOrder } = await supabase!
+    // Fetch existing order for comparison + email data
+    const { data: existingOrder, error: fetchErr } = await adminDb
       .from("orders")
       .select("*, order_items(*)")
       .eq("id", id)
       .single();
 
-    // Apply the update
-    const { data, error: dbErr } = await supabase!
+    if (fetchErr || !existingOrder) {
+      return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    }
+
+    // Apply update
+    const { data, error: dbErr } = await adminDb
       .from("orders")
       .update({ ...parsed.data, updated_at: new Date().toISOString() })
       .eq("id", id)
@@ -42,15 +50,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (dbErr) throw dbErr;
 
-    // Send status update email if status changed and we have order data
-    if (parsed.data.status && existingOrder && existingOrder.status !== parsed.data.status) {
-      await sendOrderStatusUpdateToCustomer({
+    // Send status update email to customer (non-blocking)
+    if (parsed.data.status && existingOrder.status !== parsed.data.status) {
+      sendOrderStatusUpdateToCustomer({
         customerName:  existingOrder.customer_name,
         customerEmail: existingOrder.customer_email,
         orderNumber:   existingOrder.order_number,
         newStatus:     parsed.data.status,
         adminNotes:    parsed.data.admin_notes ?? existingOrder.admin_notes ?? null,
-        items:         (existingOrder.order_items ?? []).map((i: {
+        items: (existingOrder.order_items ?? []).map((i: {
           product_name: string; category: string | null; price: number | null; quantity: number;
         }) => ({
           product_name: i.product_name,
@@ -59,7 +67,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
           quantity:     i.quantity,
         })),
         subtotal: existingOrder.subtotal,
-      }).catch(err => console.error("[order status email]", err)); // non-blocking
+      }).catch(err => console.error("[status email]", err));
     }
 
     return NextResponse.json({ data });
