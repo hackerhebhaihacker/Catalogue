@@ -13,7 +13,7 @@ export interface CartItem {
 
 interface CartContextValue {
   items: CartItem[];
-  count: number;            // total units
+  count: number;
   subtotal: number;
   isOpen: boolean;
   openCart:  () => void;
@@ -25,23 +25,63 @@ interface CartContextValue {
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "nexus_cart";
+
+// Version key — bump this to invalidate old cart data
+const STORAGE_KEY = "nexus_cart_v2";
 
 function load(): CartItem[] {
   if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]"); } catch { return []; }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    // Validate it's an array of valid cart items
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (i): i is CartItem =>
+        typeof i === "object" &&
+        typeof i.id === "string" &&
+        typeof i.product_name === "string" &&
+        typeof i.quantity === "number" &&
+        i.quantity > 0
+    );
+  } catch {
+    return [];
+  }
 }
+
 function save(items: CartItem[]) {
-  if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+}
+
+// Deduplicate items by id — merges quantities if same id appears twice
+function dedupe(items: CartItem[]): CartItem[] {
+  const map = new Map<string, CartItem>();
+  for (const item of items) {
+    const existing = map.get(item.id);
+    if (existing) {
+      map.set(item.id, { ...existing, quantity: existing.quantity + item.quantity });
+    } else {
+      map.set(item.id, { ...item });
+    }
+  }
+  return Array.from(map.values());
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => { setItems(load()); }, []);
-
-  const setAndSave = (next: CartItem[]) => { setItems(next); save(next); };
+  // Hydrate from localStorage — deduplicate on load to fix any stale data
+  useEffect(() => {
+    const loaded = dedupe(load());
+    setItems(loaded);
+    save(loaded); // persist the deduped version
+    setHydrated(true);
+  }, []);
 
   const add = useCallback((item: Omit<CartItem, "quantity">) => {
     setItems(prev => {
@@ -52,27 +92,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       save(next);
       return next;
     });
-    setIsOpen(true); // auto-open cart drawer on add
+    setIsOpen(true);
   }, []);
 
   const remove = useCallback((id: string) => {
-    setItems(prev => { const next = prev.filter(i => i.id !== id); save(next); return next; });
-  }, []);
-
-  const update = useCallback((id: string, quantity: number) => {
     setItems(prev => {
-      const next = quantity <= 0 ? prev.filter(i => i.id !== id) : prev.map(i => i.id === id ? { ...i, quantity } : i);
+      const next = prev.filter(i => i.id !== id);
       save(next);
       return next;
     });
   }, []);
 
-  const clear  = useCallback(() => { save([]); setItems([]); }, []);
+  const update = useCallback((id: string, quantity: number) => {
+    setItems(prev => {
+      const next = quantity <= 0
+        ? prev.filter(i => i.id !== id)
+        : prev.map(i => i.id === id ? { ...i, quantity } : i);
+      save(next);
+      return next;
+    });
+  }, []);
+
+  const clear = useCallback(() => {
+    save([]);
+    setItems([]);
+  }, []);
+
   const openCart  = useCallback(() => setIsOpen(true),  []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
   const count    = items.reduce((s, i) => s + i.quantity, 0);
   const subtotal = items.reduce((s, i) => s + (i.price ?? 0) * i.quantity, 0);
+
+  // Don't render children until hydrated to avoid SSR/client mismatch
+  if (!hydrated) {
+    return (
+      <CartContext.Provider value={{ items: [], count: 0, subtotal: 0, isOpen: false, openCart, closeCart, add, remove, update, clear }}>
+        {children}
+      </CartContext.Provider>
+    );
+  }
 
   return (
     <CartContext.Provider value={{ items, count, subtotal, isOpen, openCart, closeCart, add, remove, update, clear }}>
