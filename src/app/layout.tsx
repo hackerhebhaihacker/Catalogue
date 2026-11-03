@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/toaster";
+import { CartProvider } from "@/lib/cart-context";
+import CartDrawer from "@/components/cart/CartDrawer";
 import { siteConfig } from "@/lib/site-config";
 
 const inter = Inter({
@@ -54,10 +56,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="min-h-screen flex flex-col antialiased"
         style={{ backgroundColor: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-inter, 'Inter', sans-serif)" }}
       >
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster />
+        <CartProvider>
+          <Navbar />
+          <CartDrawer />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster />
+        </CartProvider>
       </body>
     </html>
   );

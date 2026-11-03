@@ -56,7 +56,7 @@ export default function UserDashboard({ profile }: Props) {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
             style={{ backgroundColor: profile.role === "admin" ? "var(--accent-light)" : "var(--bg-subtle)", color: profile.role === "admin" ? "var(--accent)" : "var(--text-muted)" }}>
             {profile.role === "admin" && <Shield className="w-3 h-3" />}
-            {profile.role === "admin" ? "Administrator" : "Member"}
+            {profile.role === "admin" ? "Administrator" : "Customer"}
           </span>
 
           <div className="mt-6 space-y-4 text-sm text-left">
