@@ -4,14 +4,18 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── ORDER STATUS ENUM ─────────────────────────────────────────────────────────
-CREATE TYPE IF NOT EXISTS public.order_status AS ENUM (
-  'pending',
-  'confirmed',
-  'processing',
-  'dispatched',
-  'delivered',
-  'cancelled'
-);
+DO $$ BEGIN
+  CREATE TYPE public.order_status AS ENUM (
+    'pending',
+    'confirmed',
+    'processing',
+    'dispatched',
+    'delivered',
+    'cancelled'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL; -- already exists, skip
+END; $$;
 
 -- ── ORDERS ────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.orders (
