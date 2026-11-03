@@ -1,47 +1,40 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import { ShoppingBag, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
-import { Separator } from "@/components/ui/separator";
 
 export default function Footer() {
   const year = new Date().getFullYear();
-
-  // Only show social icons that have a URL set
-  const socialLinks = [
-    { icon: Facebook,  href: siteConfig.social.facebook,  label: "Facebook" },
-    { icon: Twitter,   href: siteConfig.social.twitter,   label: "Twitter" },
+  const social = [
+    { icon: Facebook,  href: siteConfig.social.facebook,  label: "Facebook"  },
+    { icon: Twitter,   href: siteConfig.social.twitter,   label: "Twitter"   },
     { icon: Instagram, href: siteConfig.social.instagram, label: "Instagram" },
-    { icon: Linkedin,  href: siteConfig.social.linkedin,  label: "LinkedIn" },
-  ].filter((s) => !!s.href);
+    { icon: Linkedin,  href: siteConfig.social.linkedin,  label: "LinkedIn"  },
+  ].filter(s => !!s.href);
 
   return (
-    <footer className="bg-gray-900 text-gray-300" role="contentinfo">
+    <footer style={{ backgroundColor: "#141210", color: "#a8a29e" }} role="contentinfo">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-[hsl(var(--primary))] flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2.5 mb-5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--accent)" }}>
                 <ShoppingBag className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-lg text-white">{siteConfig.name}</span>
+              <span className="font-display font-bold text-lg" style={{ color: "white" }}>{siteConfig.name}</span>
             </Link>
-            <p className="text-sm leading-relaxed text-gray-400 mb-5">
-              {siteConfig.shortDescription}
-            </p>
-            {socialLinks.length > 0 && (
+            <p className="text-sm leading-relaxed mb-5">{siteConfig.shortDescription}</p>
+            {social.length > 0 && (
               <div className="flex gap-3">
-                {socialLinks.map(({ icon: Icon, href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-[hsl(var(--primary))] hover:text-white transition-colors"
-                  >
+                {social.map(({ icon: Icon, href, label }) => (
+                  <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center transition-all"
+                    style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#a8a29e" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.06)"; (e.currentTarget as HTMLElement).style.color = "#a8a29e"; }}>
                     <Icon className="w-4 h-4" />
                   </a>
                 ))}
@@ -51,18 +44,20 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="font-semibold text-white mb-4">Quick Links</h3>
-            <ul className="space-y-2.5 text-sm">
+            <h3 className="text-sm font-semibold mb-5 uppercase tracking-wider" style={{ color: "white" }}>Quick Links</h3>
+            <ul className="space-y-3 text-sm">
               {[
-                { href: "/", label: "Home" },
-                { href: "/#about", label: "About Us" },
-                { href: "/#featured", label: "Featured Products" },
-                { href: "/products", label: "Product Catalogue" },
-                { href: "/#contact", label: "Contact Us" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.label}
+                { href:"/", label:"Home" },
+                { href:"/#about", label:"About Us" },
+                { href:"/#featured", label:"Featured Products" },
+                { href:"/products", label:"Product Catalogue" },
+                { href:"/#contact", label:"Contact Us" },
+              ].map(l => (
+                <li key={l.href}>
+                  <Link href={l.href} className="transition-colors link-underline" style={{ color: "#a8a29e" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#a8a29e")}>
+                    {l.label}
                   </Link>
                 </li>
               ))}
@@ -71,64 +66,61 @@ export default function Footer() {
 
           {/* Account */}
           <div>
-            <h3 className="font-semibold text-white mb-4">Account</h3>
-            <ul className="space-y-2.5 text-sm">
+            <h3 className="text-sm font-semibold mb-5 uppercase tracking-wider" style={{ color: "white" }}>Account</h3>
+            <ul className="space-y-3 text-sm">
               {[
-                { href: "/register", label: "Create Account" },
-                { href: "/login",    label: "Sign In" },
-                { href: "/dashboard", label: "My Dashboard" },
-                { href: "/login?tab=reset", label: "Forgot Password" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.label}
+                { href:"/register", label:"Create Account" },
+                { href:"/login", label:"Sign In" },
+                { href:"/dashboard", label:"My Dashboard" },
+              ].map(l => (
+                <li key={l.href}>
+                  <Link href={l.href} className="transition-colors" style={{ color: "#a8a29e" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#a8a29e")}>
+                    {l.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact — only shows fields that are actually set */}
+          {/* Contact */}
           <div>
-            <h3 className="font-semibold text-white mb-4">Contact Us</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-sm font-semibold mb-5 uppercase tracking-wider" style={{ color: "white" }}>Contact</h3>
+            <ul className="space-y-4 text-sm">
               <li>
-                <a
-                  href={`mailto:${siteConfig.email}`}
-                  className="flex items-start gap-2.5 text-gray-400 hover:text-white transition-colors"
-                >
-                  <Mail className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>{siteConfig.email}</span>
+                <a href={`mailto:${siteConfig.email}`} className="flex items-start gap-2.5 transition-colors"
+                  style={{ color: "#a8a29e" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "#a8a29e")}>
+                  <Mail className="w-4 h-4 mt-0.5 shrink-0" />{siteConfig.email}
                 </a>
               </li>
               {siteConfig.phone && (
                 <li>
-                  <a
-                    href={`tel:${siteConfig.phone}`}
-                    className="flex items-start gap-2.5 text-gray-400 hover:text-white transition-colors"
-                  >
-                    <Phone className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>{siteConfig.phone}</span>
+                  <a href={`tel:${siteConfig.phone}`} className="flex items-start gap-2.5 transition-colors"
+                    style={{ color: "#a8a29e" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "#a8a29e")}>
+                    <Phone className="w-4 h-4 mt-0.5 shrink-0" />{siteConfig.phone}
                   </a>
                 </li>
               )}
               {siteConfig.address && (
-                <li className="flex items-start gap-2.5 text-gray-400">
-                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>{siteConfig.address}</span>
+                <li className="flex items-start gap-2.5" style={{ color: "#a8a29e" }}>
+                  <MapPin className="w-4 h-4 mt-0.5 shrink-0" />{siteConfig.address}
                 </li>
               )}
             </ul>
           </div>
         </div>
 
-        <Separator className="bg-gray-800 mb-8" />
-
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+        {/* Bottom bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", color: "#78716c" }}>
           <p>© {year} {siteConfig.name}. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="transition-colors hover:text-[#a8a29e]">Privacy Policy</Link>
+            <Link href="/terms" className="transition-colors hover:text-[#a8a29e]">Terms of Service</Link>
           </div>
         </div>
       </div>

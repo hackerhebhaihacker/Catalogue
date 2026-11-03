@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, ShoppingBag, LogOut, User, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, ShoppingBag, LogOut, User, Settings, Package } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -11,7 +11,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/#about", label: "About Us" },
+  { href: "/#about", label: "About" },
   { href: "/#featured", label: "Products" },
   { href: "/#contact", label: "Contact" },
 ];
@@ -19,7 +19,7 @@ const navLinks = [
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [role, setRole] = useState<string>("user");
+  const [role, setRole] = useState("user");
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -40,7 +40,7 @@ export default function Navbar() {
   }, [supabase]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -52,22 +52,30 @@ export default function Navbar() {
     router.refresh();
   };
 
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href.replace("/#", "/"));
-
   return (
-    <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-      scrolled ? "bg-white shadow-sm border-b border-slate-200" : "bg-transparent"
-    )}>
+    <motion.header
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        scrolled
+          ? "bg-white/95 backdrop-blur-md border-b border-[var(--border)] shadow-[0_2px_20px_-4px_rgba(0,0,0,0.08)]"
+          : "bg-transparent"
+      )}
+    >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+              style={{ backgroundColor: "var(--accent)" }}>
               <ShoppingBag className="w-5 h-5 text-white" />
             </div>
-            <span className={cn("font-bold text-lg tracking-tight transition-colors", scrolled ? "text-slate-900" : "text-white")}>
+            <span className={cn(
+              "font-bold text-lg tracking-tight transition-colors font-display",
+              scrolled ? "text-[var(--text)]" : "text-white"
+            )}>
               {siteConfig.name}
             </span>
           </Link>
@@ -76,20 +84,21 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}
-                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 link-underline",
                   scrolled
-                    ? isActive(link.href) ? "text-blue-600 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
-                    : isActive(link.href) ? "text-white bg-white/20" : "text-white/90 hover:text-white hover:bg-white/10"
+                    ? pathname === link.href ? "text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                    : "text-white/80 hover:text-white"
                 )}>
                 {link.label}
               </Link>
             ))}
             {user && (
               <Link href="/products"
-                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all link-underline",
                   scrolled
-                    ? pathname === "/products" ? "text-blue-600 bg-blue-50" : "text-slate-700 hover:bg-slate-100"
-                    : pathname === "/products" ? "text-white bg-white/20" : "text-white/90 hover:text-white hover:bg-white/10"
+                    ? pathname === "/products" ? "text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text)]"
+                    : "text-white/80 hover:text-white"
                 )}>
                 Catalogue
               </Link>
@@ -101,78 +110,115 @@ export default function Navbar() {
             {user ? (
               <>
                 {role === "admin" && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/admin"><Settings className="w-4 h-4" />Admin</Link>
-                  </Button>
+                  <Link href="/admin" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}>
+                    <Settings className="w-3.5 h-3.5" />Admin
+                  </Link>
                 )}
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/dashboard"><User className="w-4 h-4" />Dashboard</Link>
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="w-4 h-4" />Logout
-                </Button>
+                <Link href="/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all"
+                  style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--text-muted)"; }}>
+                  <User className="w-3.5 h-3.5" />Dashboard
+                </Link>
+                <button onClick={handleLogout} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                  style={{ color: "var(--text-muted)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--error)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}>
+                  <LogOut className="w-3.5 h-3.5" />Logout
+                </button>
               </>
             ) : (
               <>
-                <Button variant={scrolled ? "outline" : "ghost"} size="sm" asChild
-                  className={!scrolled ? "text-white border-white/30 hover:bg-white/10" : ""}>
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button size="sm" asChild><Link href="/register">Register</Link></Button>
+                <Link href="/login" className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{ color: scrolled ? "var(--text-muted)" : "rgba(255,255,255,0.85)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = scrolled ? "var(--text)" : "white")}
+                  onMouseLeave={e => (e.currentTarget.style.color = scrolled ? "var(--text-muted)" : "rgba(255,255,255,0.85)")}>
+                  Sign In
+                </Link>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link href="/register" className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all shadow-warm-sm"
+                    style={{ backgroundColor: "var(--accent)" }}
+                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--accent-dark)")}
+                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = "var(--accent)")}>
+                    Get Started
+                  </Link>
+                </motion.div>
               </>
             )}
           </div>
 
           {/* Mobile toggle */}
-          <button onClick={() => setOpen(!open)}
-            className={cn("md:hidden p-2 rounded-md", scrolled ? "text-slate-900" : "text-white")}
+          <button onClick={() => setOpen(!open)} className="md:hidden p-2 rounded-lg transition-colors"
+            style={{ color: scrolled ? "var(--text)" : "white" }}
             aria-label="Toggle menu">
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile menu */}
-        {open && (
-          <div className="md:hidden bg-white border-t border-slate-200 rounded-b-xl shadow-lg py-4 px-2">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-                {link.label}
-              </Link>
-            ))}
-            {user && (
-              <Link href="/products" onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors">
-                Catalogue
-              </Link>
-            )}
-            <div className="mt-3 pt-3 border-t border-slate-200 flex flex-col gap-2 px-2">
-              {user ? (
-                <>
-                  {role === "admin" && (
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href="/admin" onClick={() => setOpen(false)}>Admin Dashboard</Link>
-                    </Button>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="md:hidden overflow-hidden"
+              style={{ backgroundColor: "var(--bg-card)", borderTop: "1px solid var(--border)" }}>
+              <div className="py-4 px-2 space-y-1">
+                {navLinks.map((link) => (
+                  <Link key={link.href} href={link.href} onClick={() => setOpen(false)}
+                    className="block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    style={{ color: "var(--text)" }}>
+                    {link.label}
+                  </Link>
+                ))}
+                {user && (
+                  <Link href="/products" onClick={() => setOpen(false)}
+                    className="block px-4 py-2.5 rounded-lg text-sm font-medium"
+                    style={{ color: "var(--text)" }}>
+                    <Package className="w-4 h-4 inline mr-2" />Catalogue
+                  </Link>
+                )}
+                <div className="pt-3 mt-3 flex flex-col gap-2 px-2" style={{ borderTop: "1px solid var(--border)" }}>
+                  {user ? (
+                    <>
+                      {role === "admin" && (
+                        <Link href="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border"
+                          style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+                          <Settings className="w-4 h-4" />Admin Dashboard
+                        </Link>
+                      )}
+                      <Link href="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border"
+                        style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+                        <User className="w-4 h-4" />My Dashboard
+                      </Link>
+                      <button onClick={() => { handleLogout(); setOpen(false); }} className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-left"
+                        style={{ color: "var(--error)" }}>
+                        <LogOut className="w-4 h-4" />Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" onClick={() => setOpen(false)} className="px-4 py-2.5 rounded-lg text-sm font-medium border text-center"
+                        style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+                        Sign In
+                      </Link>
+                      <Link href="/register" onClick={() => setOpen(false)} className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white text-center"
+                        style={{ backgroundColor: "var(--accent)" }}>
+                        Get Started Free
+                      </Link>
+                    </>
                   )}
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/dashboard" onClick={() => setOpen(false)}>My Dashboard</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => { handleLogout(); setOpen(false); }}>Logout</Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href="/login" onClick={() => setOpen(false)}>Login</Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href="/register" onClick={() => setOpen(false)}>Register</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
-    </header>
+    </motion.header>
   );
 }

@@ -38,7 +38,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="min-h-screen pt-16 bg-slate-50">
+    <div className="min-h-screen pt-16" style={{ backgroundColor: "var(--bg-subtle)" }}>
       <AdminDashboard
         initialProducts={products ?? []}
         categories={categories ?? []}

@@ -21,7 +21,7 @@ export default async function ProductsPage() {
   ]);
 
   return (
-    <div className="min-h-screen pt-16 bg-[hsl(var(--background))]">
+    <div className="min-h-screen pt-16" style={{ backgroundColor: "var(--bg)" }}>
       <ProductCatalogue
         initialProducts={products ?? []}
         categories={categories ?? []}

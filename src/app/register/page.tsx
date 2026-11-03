@@ -9,7 +9,8 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen pt-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen pt-16 flex items-center justify-center p-4"
+      style={{ backgroundColor: "var(--bg-subtle)" }}>
       <RegisterForm />
     </div>
   );

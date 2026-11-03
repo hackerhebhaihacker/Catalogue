@@ -70,7 +70,8 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+    <div className="w-full max-w-md rounded-2xl overflow-hidden shadow-warm-lg border"
+      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-7 text-white text-center">
         <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3">

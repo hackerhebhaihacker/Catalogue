@@ -1,147 +1,207 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Lock, Heart, Star, ShoppingCart, Check, Eye } from "lucide-react";
+import { useInView } from "@/hooks/use-in-view";
 import { formatPrice } from "@/lib/utils";
 
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Professional HD Webcam",
-    category: "Electronics",
-    description: "Crystal-clear 4K video with built-in noise-cancelling mic, perfect for remote work and content creation.",
-    price: 10999,
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
-    badge: "Best Seller",
-  },
-  {
-    id: "2",
-    name: "Ergonomic Office Chair",
-    category: "Furniture",
-    description: "Lumbar-support mesh chair with adjustable armrests and breathable material for all-day comfort.",
-    price: 37999,
-    image: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=600&q=80",
-    badge: "Featured",
-  },
-  {
-    id: "3",
-    name: "Wireless Noise-Cancelling Headphones",
-    category: "Electronics",
-    description: "30-hour battery life with adaptive noise cancellation and studio-quality audio.",
-    price: 23499,
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-    badge: "New Arrival",
-  },
-  {
-    id: "4",
-    name: "Standing Desk Converter",
-    category: "Furniture",
-    description: "Gas-spring mechanism for seamless height adjustment, fits standard desks up to 80 cm wide.",
-    price: 15999,
-    image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80",
-    badge: "Popular",
-  },
-  {
-    id: "5",
-    name: "Smart LED Desk Lamp",
-    category: "Lighting",
-    description: "Touch-sensitive lamp with 5 colour temperatures, USB-C charging port and auto dimming.",
-    price: 6799,
-    image: "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80",
-    badge: "Featured",
-  },
-  {
-    id: "6",
-    name: "Mechanical Keyboard",
-    category: "Electronics",
-    description: "Tactile brown switches with RGB per-key lighting, aluminium frame and dual-layer silencing.",
-    price: 13299,
-    image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&q=80",
-    badge: "Editor's Choice",
-  },
+const products = [
+  { id:"1", name:"Professional HD Webcam",           category:"Electronics", price:10999, originalPrice:13999, rating:4.8, reviews:124, badge:"Best Seller", image:"https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80" },
+  { id:"2", name:"Ergonomic Office Chair",            category:"Furniture",   price:37999, originalPrice:44999, rating:4.9, reviews:89,  badge:"Top Pick",   image:"https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=600&q=80" },
+  { id:"3", name:"Wireless Noise-Cancelling Headphones", category:"Electronics", price:23499, originalPrice:29999, rating:4.7, reviews:312, badge:"New",     image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80" },
+  { id:"4", name:"Standing Desk Converter",           category:"Furniture",   price:15999, originalPrice:18999, rating:4.6, reviews:67,  badge:"Popular",    image:"https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80" },
+  { id:"5", name:"Smart LED Desk Lamp",               category:"Lighting",    price:6799,  originalPrice:8499,  rating:4.8, reviews:201, badge:"Featured",   image:"https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80" },
+  { id:"6", name:"Mechanical Keyboard",               category:"Electronics", price:13299, originalPrice:15999, rating:4.9, reviews:445, badge:"Editor's Pick", image:"https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&q=80" },
 ];
 
-export default function FeaturedProducts() {
+function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
+  const [wished, setWished] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (added) return;
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  const discount = Math.round((1 - product.price / product.originalPrice) * 100);
+
   return (
-    <section id="featured" className="py-24 bg-slate-50" aria-labelledby="featured-heading">
+    <motion.article
+      className="relative rounded-2xl overflow-hidden border cursor-pointer group"
+      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)", boxShadow: "var(--shadow-sm)" }}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.5, delay: index * 0.07, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -6, boxShadow: "var(--shadow-xl)" }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+    >
+      {/* Image */}
+      <div className="relative h-56 overflow-hidden" style={{ backgroundColor: "var(--bg-subtle)" }}>
+        <motion.div className="absolute inset-0" animate={{ scale: hovered ? 1.07 : 1 }} transition={{ duration: 0.5, ease: "easeOut" }}>
+          <Image src={product.image} alt={product.name} fill className="object-cover" sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" />
+        </motion.div>
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold text-white"
+            style={{ backgroundColor: "var(--accent)" }}>
+            {product.badge}
+          </span>
+          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold text-white"
+            style={{ backgroundColor: "var(--success)" }}>
+            -{discount}%
+          </span>
+        </div>
+
+        {/* Wishlist */}
+        <motion.button
+          className="absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center border transition-all"
+          style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)" }}
+          onClick={e => { e.preventDefault(); setWished(w => !w); }}
+          whileTap={{ scale: 0.85 }}
+          animate={wished ? { scale: [1, 1.35, 1] } : {}}
+          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}>
+          <Heart className="w-4 h-4 transition-all" style={{ color: wished ? "#e11d48" : "var(--text-muted)", fill: wished ? "#e11d48" : "none" }} />
+        </motion.button>
+
+        {/* Quick-view overlay */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              className="absolute inset-x-0 bottom-0 flex items-center justify-center p-3"
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.18 }}>
+              <Link href="/login"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white backdrop-blur-sm"
+                style={{ backgroundColor: "rgba(0,0,0,0.75)" }}>
+                <Eye className="w-4 h-4" />Quick View
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--accent)" }}>{product.category}</span>
+        <h3 className="font-semibold mt-1.5 mb-2 leading-snug line-clamp-1" style={{ color: "var(--text)" }}>{product.name}</h3>
+
+        {/* Rating */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-3.5 h-3.5" style={{ fill: i < Math.floor(product.rating) ? "#f59e0b" : "none", color: i < Math.floor(product.rating) ? "#f59e0b" : "var(--border-strong)" }} />
+            ))}
+          </div>
+          <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{product.rating} ({product.reviews})</span>
+        </div>
+
+        {/* Price + CTA */}
+        <div className="flex items-center justify-between pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+          <div>
+            <span className="text-lg font-black" style={{ color: "var(--text)" }}>{formatPrice(product.price)}</span>
+            <span className="text-xs ml-1.5 line-through" style={{ color: "var(--text-light)" }}>{formatPrice(product.originalPrice)}</span>
+          </div>
+          <motion.button
+            onClick={handleAddToCart}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+            style={{ backgroundColor: added ? "var(--success)" : "var(--accent)" }}
+            whileTap={{ scale: 0.94 }}
+            animate={added ? { scale: [1, 1.08, 1] } : {}}>
+            <AnimatePresence mode="wait">
+              {added ? (
+                <motion.span key="check" className="flex items-center gap-1"
+                  initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+                  <Check className="w-3.5 h-3.5" />Added
+                </motion.span>
+              ) : (
+                <motion.span key="cart" className="flex items-center gap-1"
+                  initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
+                  <Lock className="w-3.5 h-3.5" />View
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
+
+export default function FeaturedProducts() {
+  const { ref, inView } = useInView();
+
+  return (
+    <section id="featured" ref={ref as React.RefObject<HTMLElement>} className="py-28" style={{ backgroundColor: "var(--bg)" }} aria-labelledby="featured-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
-          <div>
-            <span className="text-sm font-semibold tracking-wider text-blue-600 uppercase">Our Catalogue</span>
-            <h2 id="featured-heading" className="mt-2 text-4xl font-bold text-slate-900 tracking-tight">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--accent)" }}>Our Catalogue</span>
+            <h2 id="featured-heading" className="font-display mt-3 text-4xl sm:text-5xl font-bold tracking-tight" style={{ color: "var(--text)" }}>
               Featured Products
             </h2>
-            <p className="mt-3 text-slate-500 max-w-xl">
-              A hand-picked selection from our premium catalogue. Register to unlock the full range.
+            <p className="mt-4 max-w-xl leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              A hand-picked selection from our premium catalogue. Register to unlock the full range and pricing.
             </p>
-          </div>
-          <Button variant="outline" asChild className="shrink-0 border-slate-300 text-slate-700 hover:bg-slate-100">
-            <Link href="/register">
-              View Full Catalogue
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.15 }}>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link href="/register"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold border transition-all shrink-0"
+                style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "var(--accent)"; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; (e.currentTarget as HTMLElement).style.color = "var(--accent)"; }}>
+                View Full Catalogue
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Product grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredProducts.map((product) => (
-            <article
-              key={product.id}
-              className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col"
-            >
-              <div className="relative h-52 overflow-hidden bg-slate-100">
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="inline-flex items-center rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
-                    {product.badge}
-                  </span>
-                </div>
-              </div>
-              <div className="p-6 flex flex-col flex-1">
-                <span className="inline-flex w-fit items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 mb-2">
-                  {product.category}
-                </span>
-                <h3 className="font-semibold text-slate-900 text-lg mt-1 mb-2 leading-snug">{product.name}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed flex-1">{product.description}</p>
-                <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
-                  <span className="text-xl font-bold text-blue-600">{formatPrice(product.price)}</span>
-                  <Button size="sm" variant="outline" asChild className="border-slate-200 text-slate-700 hover:bg-slate-50">
-                    <Link href="/login">
-                      <Lock className="w-3.5 h-3.5" />
-                      View Details
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </article>
-          ))}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
+          {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
         </div>
 
         {/* CTA banner */}
-        <div className="mt-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-10 text-center text-white shadow-xl">
-          <h3 className="text-2xl font-bold mb-2">Ready to Explore the Full Catalogue?</h3>
-          <p className="text-blue-100 mb-6 max-w-lg mx-auto">
-            Create a free account to unlock all products, detailed specifications and exclusive pricing.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" asChild className="bg-white text-blue-700 hover:bg-blue-50 font-semibold">
-              <Link href="/register">Create Free Account</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild className="border-white/40 text-white hover:bg-white/10">
-              <Link href="/login">Sign In <ArrowRight className="w-4 h-4" /></Link>
-            </Button>
+        <motion.div
+          className="mt-16 rounded-3xl p-10 sm:p-14 text-center overflow-hidden relative"
+          style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%)" }}
+          initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 50%, rgba(99,102,241,0.3) 0%, transparent 60%)" }} />
+          <div className="relative z-10">
+            <h3 className="font-display text-2xl sm:text-3xl font-bold text-white mb-3">Unlock the Complete Catalogue</h3>
+            <p className="mb-8 max-w-lg mx-auto" style={{ color: "rgba(199,210,254,0.85)" }}>
+              Create a free account to browse all 500+ products with full specifications and exclusive pricing.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Link href="/register" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-indigo-900"
+                  style={{ backgroundColor: "white" }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#e0e7ff")}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}>
+                  Create Free Account <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Link href="/login" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-medium border transition-all"
+                  style={{ borderColor: "rgba(255,255,255,0.3)", color: "rgba(255,255,255,0.85)", backgroundColor: "rgba(255,255,255,0.08)" }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)")}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)")}>
+                  <ShoppingCart className="w-4 h-4" />Sign In
+                </Link>
+              </motion.div>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

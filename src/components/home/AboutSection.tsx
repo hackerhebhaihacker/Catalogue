@@ -1,100 +1,89 @@
+"use client";
 import React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
+import { useInView } from "@/hooks/use-in-view";
 import { siteConfig } from "@/lib/site-config";
 
 const pillars = [
-  {
-    title: "Our Mission",
-    description: "Deliver premium products with unmatched quality and reliability, empowering customers to achieve their goals with confidence.",
-    accent: "bg-blue-600",
-  },
-  {
-    title: "Our Vision",
-    description: "Become the most trusted product catalogue for professionals and businesses across India.",
-    accent: "bg-indigo-600",
-  },
-  {
-    title: "Our Values",
-    description: "Integrity, innovation and customer-first thinking guide every product selection and business decision we make.",
-    accent: "bg-violet-600",
-  },
+  { title: "Our Mission", body: "Deliver premium products with unmatched quality and reliability, empowering every customer to achieve their goals with confidence.", accent: "var(--accent)" },
+  { title: "Our Vision", body: "Become India's most trusted product catalogue for professionals and businesses — a name synonymous with quality.", accent: "#7c3aed" },
+  { title: "Our Values", body: "Integrity, innovation and customer-first thinking guide every product selection and business decision we make.", accent: "#0891b2" },
 ];
 
-const highlights = [
-  "ISO-certified quality standards",
-  "Dedicated customer support team",
-  "Trusted by 10,000+ businesses",
-  "Eco-conscious product sourcing",
-];
+const highlights = ["ISO-certified quality standards", "Dedicated 24/7 customer support", "Trusted by 10,000+ businesses", "Eco-conscious product sourcing"];
 
 export default function AboutSection() {
+  const { ref, inView } = useInView();
+
   return (
-    <section id="about" className="py-24 bg-white" aria-labelledby="about-heading">
+    <section id="about" ref={ref as React.RefObject<HTMLElement>} className="py-28" style={{ backgroundColor: "var(--bg)" }} aria-labelledby="about-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Section label */}
-        <div className="text-center mb-16">
-          <span className="text-xs font-bold tracking-widest text-blue-600 uppercase">Who We Are</span>
-          <h2 id="about-heading" className="mt-3 text-4xl font-extrabold text-slate-900 tracking-tight">
+        {/* Label + heading */}
+        <motion.div className="text-center mb-20"
+          initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <span className="text-xs font-bold tracking-widest uppercase" style={{ color: "var(--accent)" }}>Who We Are</span>
+          <h2 id="about-heading" className="font-display mt-3 text-4xl sm:text-5xl font-bold tracking-tight" style={{ color: "var(--text)" }}>
             About {siteConfig.name}
           </h2>
-          <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
             A company built on the belief that quality products and outstanding service go hand in hand.
           </p>
-        </div>
+        </motion.div>
 
         {/* Two-column */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
-          {/* Image */}
-          <div className="relative">
-            <div className="relative rounded-3xl overflow-hidden aspect-[4/3] shadow-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80"
-                alt="Our modern office"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
+        <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+          <motion.div className="relative"
+            initial={{ opacity: 0, x: -40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.2 }}>
+            <div className="relative rounded-3xl overflow-hidden aspect-[4/3] shadow-warm-xl">
+              <Image src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="Our office" fill className="object-cover" sizes="(max-width:1024px) 100vw, 50vw" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, transparent 60%, rgba(79,70,229,0.15))" }} />
             </div>
-            {/* Floating card */}
-            <div className="absolute -bottom-5 -right-5 bg-white rounded-2xl shadow-xl border border-slate-100 px-6 py-5">
-              <div className="text-3xl font-black text-blue-600">12+</div>
-              <div className="text-sm text-slate-500 mt-0.5">Years of Excellence</div>
-            </div>
-          </div>
+            {/* Floating stat */}
+            <motion.div
+              className="absolute -bottom-6 -right-6 rounded-2xl px-6 py-5 border"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)", boxShadow: "var(--shadow-lg)" }}
+              initial={{ opacity: 0, scale: 0.8 }} animate={inView ? { opacity: 1, scale: 1 } : {}} transition={{ duration: 0.5, delay: 0.5 }}>
+              <div className="font-display text-3xl font-black" style={{ color: "var(--accent)" }}>12+</div>
+              <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>Years of Excellence</div>
+            </motion.div>
+          </motion.div>
 
-          {/* Text */}
-          <div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Building Trust Through Quality</h3>
-            <p className="text-slate-500 mb-5 leading-relaxed">
-              {siteConfig.name} was founded with a simple yet powerful idea: customers deserve access to the best
-              products with complete transparency and confidence. We carefully curate every item to meet the
-              highest standards of quality, durability and value.
+          <motion.div
+            initial={{ opacity: 0, x: 40 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.7, delay: 0.3 }}>
+            <h3 className="font-display text-2xl font-bold mb-5" style={{ color: "var(--text)" }}>Building Trust Through Quality</h3>
+            <p className="leading-relaxed mb-5" style={{ color: "var(--text-muted)" }}>
+              {siteConfig.name} was founded with a simple yet powerful idea: customers deserve access to the best products with complete transparency and confidence.
             </p>
-            <p className="text-slate-500 mb-8 leading-relaxed">
-              Our expert team evaluates, tests and selects products that genuinely make a difference in your
-              personal and professional life. We don&apos;t compromise — and neither should you.
+            <p className="leading-relaxed mb-8" style={{ color: "var(--text-muted)" }}>
+              Our expert team evaluates, tests and selects products that genuinely make a difference. We don&apos;t compromise — and neither should you.
             </p>
             <ul className="space-y-3">
-              {highlights.map(item => (
-                <li key={item} className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+              {highlights.map((item, i) => (
+                <motion.li key={item} className="flex items-center gap-3 text-sm" style={{ color: "var(--text)" }}
+                  initial={{ opacity: 0, x: 16 }} animate={inView ? { opacity: 1, x: 0 } : {}} transition={{ duration: 0.4, delay: 0.4 + i * 0.08 }}>
+                  <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: "var(--success)" }} />
                   {item}
-                </li>
+                </motion.li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         </div>
 
         {/* Pillars */}
         <div className="grid sm:grid-cols-3 gap-6">
-          {pillars.map(p => (
-            <div key={p.title} className="relative bg-white rounded-2xl border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-              <div className={`absolute top-0 left-0 w-1 h-full ${p.accent} rounded-l-2xl`} />
-              <h4 className="text-lg font-bold text-slate-900 mb-3">{p.title}</h4>
-              <p className="text-sm text-slate-500 leading-relaxed">{p.description}</p>
-            </div>
+          {pillars.map((p, i) => (
+            <motion.div key={p.title}
+              className="rounded-2xl p-8 border relative overflow-hidden"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border)", boxShadow: "var(--shadow-sm)" }}
+              initial={{ opacity: 0, y: 32 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
+              whileHover={{ y: -4, boxShadow: "var(--shadow-md)" }}>
+              <div className="absolute top-0 left-0 w-1 h-full rounded-l-2xl" style={{ backgroundColor: p.accent }} />
+              <h4 className="font-display text-lg font-bold mb-3" style={{ color: "var(--text)" }}>{p.title}</h4>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{p.body}</p>
+            </motion.div>
           ))}
         </div>
       </div>
