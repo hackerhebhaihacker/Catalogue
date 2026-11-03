@@ -115,3 +115,39 @@ export type Product = Database["public"]["Tables"]["products"]["Row"];
 export type ProductWithCategory = Product & {
   categories: Category | null;
 };
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "processing"
+  | "dispatched"
+  | "delivered"
+  | "cancelled";
+
+export interface Order {
+  id:             string;
+  order_number:   string;
+  customer_id:    string;
+  customer_name:  string;
+  customer_email: string;
+  customer_phone: string | null;
+  status:         OrderStatus;
+  subtotal:       number;
+  notes:          string | null;
+  admin_notes:    string | null;
+  created_at:     string;
+  updated_at:     string;
+}
+
+export interface OrderItem {
+  id:           string;
+  order_id:     string;
+  product_id:   string | null;
+  product_name: string;
+  category:     string | null;
+  price:        number | null;
+  quantity:     number;
+  line_total:   number;
+}
+
+export type OrderWithItems = Order & { order_items: OrderItem[] };
