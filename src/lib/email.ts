@@ -217,3 +217,108 @@ export async function sendNewOrderAlertToAdmin({
 </body></html>`,
   });
 }
+
+/* ── ORDER STATUS UPDATE → CUSTOMER ────────────────────────────────────────── */
+const STATUS_LABELS: Record<string, { label: string; emoji: string; message: string; color: string }> = {
+  confirmed:  { label: "Confirmed",  emoji: "✅", color: "#1e40af", message: "Great news! Your order has been confirmed and is being prepared." },
+  processing: { label: "Processing", emoji: "⚙️", color: "#6b21a8", message: "Your order is currently being processed by our team." },
+  dispatched: { label: "Dispatched", emoji: "🚚", color: "#065f46", message: "Your order is on its way! It has been dispatched for delivery." },
+  delivered:  { label: "Delivered",  emoji: "📦", color: "#166534", message: "Your order has been delivered. We hope you love your products!" },
+  cancelled:  { label: "Cancelled",  emoji: "❌", color: "#991b1b", message: "Your order has been cancelled. Please contact us if you have questions." },
+};
+
+interface StatusUpdateItem {
+  product_name: string;
+  category: string;
+  price: number | null;
+  quantity: number;
+}
+
+export async function sendOrderStatusUpdateToCustomer({
+  customerName, customerEmail, orderNumber, newStatus, adminNotes, items, subtotal,
+}: {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  newStatus: string;
+  adminNotes: string | null;
+  items: StatusUpdateItem[];
+  subtotal: number;
+}) {
+  const cfg = STATUS_LABELS[newStatus];
+  if (!cfg) return; // don't send email for unknown status
+
+  const formatINR = (n: number) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+
+  const itemRows = items.map(i => `
+    <tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:8px;color:#1c1917;font-size:13px;">${i.product_name}</td>
+      <td style="padding:8px;text-align:center;color:#1c1917;font-size:13px;">${i.quantity}</td>
+      <td style="padding:8px;text-align:right;color:#1c1917;font-size:13px;font-weight:600;">
+        ${i.price != null ? formatINR(i.price * i.quantity) : "On request"}
+      </td>
+    </tr>`).join("");
+
+  return getResend().emails.send({
+    from: getFrom(),
+    to: customerEmail,
+    subject: `${cfg.emoji} Order ${cfg.label} — ${orderNumber} | ${siteConfig.name}`,
+    html: `<!DOCTYPE html><html><body style="font-family:'Inter',sans-serif;background:#faf9f7;padding:40px 0;margin:0;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:20px;overflow:hidden;border:1px solid #e7e5e4;">
+    <!-- Header -->
+    <div style="background:${cfg.color};padding:36px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:12px;">${cfg.emoji}</div>
+      <h1 style="color:#fff;margin:0;font-size:22px;font-weight:700;">Order ${cfg.label}!</h1>
+      <p style="color:rgba(255,255,255,0.8);margin:6px 0 0;font-size:14px;">Hi ${customerName}, here's your order update</p>
+    </div>
+    <!-- Body -->
+    <div style="padding:32px;">
+      <!-- Order number -->
+      <div style="background:#f4f3f0;border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:#78716c;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Order Number</span>
+        <span style="font-size:18px;font-weight:800;color:#4f46e5;">${orderNumber}</span>
+      </div>
+      <!-- Message -->
+      <div style="padding:16px 20px;background:#f0fdf4;border-radius:12px;border:1px solid #bbf7d0;margin-bottom:24px;">
+        <p style="margin:0;font-size:14px;color:#166534;line-height:1.6;">${cfg.message}</p>
+      </div>
+      ${adminNotes ? `
+      <!-- Admin message -->
+      <div style="padding:16px 20px;background:#fefce8;border-radius:12px;border:1px solid #fde68a;margin-bottom:24px;">
+        <p style="margin:0 0 6px;font-size:12px;color:#92400e;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Message from our team</p>
+        <p style="margin:0;font-size:14px;color:#78350f;line-height:1.6;">${adminNotes}</p>
+      </div>` : ""}
+      <!-- Items -->
+      <h3 style="color:#1c1917;font-size:14px;font-weight:700;margin:0 0 8px;">Your Order</h3>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f4f3f0;">
+            <th style="padding:8px;text-align:left;font-size:11px;color:#78716c;font-weight:600;text-transform:uppercase;">Product</th>
+            <th style="padding:8px;text-align:center;font-size:11px;color:#78716c;font-weight:600;text-transform:uppercase;">Qty</th>
+            <th style="padding:8px;text-align:right;font-size:11px;color:#78716c;font-weight:600;text-transform:uppercase;">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+        <tfoot>
+          <tr style="border-top:2px solid #e7e5e4;">
+            <td colspan="2" style="padding:10px 8px;font-weight:600;color:#78716c;font-size:13px;">Subtotal</td>
+            <td style="padding:10px 8px;text-align:right;font-size:16px;font-weight:800;color:#1c1917;">${subtotal > 0 ? formatINR(subtotal) : "—"}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <!-- CTA -->
+      <div style="margin-top:28px;text-align:center;">
+        <a href="${siteConfig.url}/dashboard" style="display:inline-block;background:#4f46e5;color:#fff;padding:13px 30px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;">
+          View Order in Dashboard →
+        </a>
+      </div>
+      <hr style="border:none;border-top:1px solid #e7e5e4;margin:24px 0;">
+      <p style="color:#a8a29e;font-size:12px;text-align:center;margin:0;">
+        Questions? <a href="mailto:${siteConfig.email}" style="color:#4f46e5;">${siteConfig.email}</a>
+      </p>
+    </div>
+  </div>
+</body></html>`,
+  });
+}
