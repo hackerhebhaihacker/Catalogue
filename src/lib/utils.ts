@@ -7,9 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(price: number | null | undefined): string {
   if (price == null) return "Price on request";
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(price);
 }
 

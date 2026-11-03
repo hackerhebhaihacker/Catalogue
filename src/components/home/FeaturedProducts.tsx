@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 
-// Demo featured products (shown on homepage to everyone)
 const featuredProducts = [
   {
     id: "1",
     name: "Professional HD Webcam",
     category: "Electronics",
     description: "Crystal-clear 4K video with built-in noise-cancelling mic, perfect for remote work and content creation.",
-    price: 129.99,
+    price: 10999,
     image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
     badge: "Best Seller",
   },
@@ -22,7 +21,7 @@ const featuredProducts = [
     name: "Ergonomic Office Chair",
     category: "Furniture",
     description: "Lumbar-support mesh chair with adjustable armrests and breathable material for all-day comfort.",
-    price: 449.00,
+    price: 37999,
     image: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=600&q=80",
     badge: "Featured",
   },
@@ -31,7 +30,7 @@ const featuredProducts = [
     name: "Wireless Noise-Cancelling Headphones",
     category: "Electronics",
     description: "30-hour battery life with adaptive noise cancellation and studio-quality audio.",
-    price: 279.95,
+    price: 23499,
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
     badge: "New Arrival",
   },
@@ -39,8 +38,8 @@ const featuredProducts = [
     id: "4",
     name: "Standing Desk Converter",
     category: "Furniture",
-    description: "Gas-spring mechanism for seamless height adjustment, fits standard desks up to 80cm wide.",
-    price: 189.00,
+    description: "Gas-spring mechanism for seamless height adjustment, fits standard desks up to 80 cm wide.",
+    price: 15999,
     image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80",
     badge: "Popular",
   },
@@ -49,7 +48,7 @@ const featuredProducts = [
     name: "Smart LED Desk Lamp",
     category: "Lighting",
     description: "Touch-sensitive lamp with 5 colour temperatures, USB-C charging port and auto dimming.",
-    price: 79.99,
+    price: 6799,
     image: "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=600&q=80",
     badge: "Featured",
   },
@@ -57,8 +56,8 @@ const featuredProducts = [
     id: "6",
     name: "Mechanical Keyboard",
     category: "Electronics",
-    description: "Tactile brown switches with RGB per-key lighting, aluminium frame, and dual-layer silencing.",
-    price: 159.00,
+    description: "Tactile brown switches with RGB per-key lighting, aluminium frame and dual-layer silencing.",
+    price: 13299,
     image: "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=600&q=80",
     badge: "Editor's Choice",
   },
@@ -66,25 +65,20 @@ const featuredProducts = [
 
 export default function FeaturedProducts() {
   return (
-    <section id="featured" className="py-24 bg-[hsl(var(--muted)/0.3)]" aria-labelledby="featured-heading">
+    <section id="featured" className="py-24 bg-slate-50" aria-labelledby="featured-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
-            <span className="text-sm font-semibold tracking-wider text-[hsl(var(--primary))] uppercase">
-              Our Catalogue
-            </span>
-            <h2
-              id="featured-heading"
-              className="mt-2 text-4xl font-bold text-[hsl(var(--foreground))] tracking-tight"
-            >
+            <span className="text-sm font-semibold tracking-wider text-blue-600 uppercase">Our Catalogue</span>
+            <h2 id="featured-heading" className="mt-2 text-4xl font-bold text-slate-900 tracking-tight">
               Featured Products
             </h2>
-            <p className="mt-3 text-[hsl(var(--muted-foreground))] max-w-xl">
+            <p className="mt-3 text-slate-500 max-w-xl">
               A hand-picked selection from our premium catalogue. Register to unlock the full range.
             </p>
           </div>
-          <Button variant="outline" asChild className="shrink-0">
+          <Button variant="outline" asChild className="shrink-0 border-slate-300 text-slate-700 hover:bg-slate-100">
             <Link href="/register">
               View Full Catalogue
               <ArrowRight className="w-4 h-4" />
@@ -97,10 +91,9 @@ export default function FeaturedProducts() {
           {featuredProducts.map((product) => (
             <article
               key={product.id}
-              className="bg-[hsl(var(--card))] rounded-2xl overflow-hidden border border-[hsl(var(--border))] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col"
+              className="bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col"
             >
-              {/* Image */}
-              <div className="relative h-56 overflow-hidden bg-[hsl(var(--muted))]">
+              <div className="relative h-52 overflow-hidden bg-slate-100">
                 <Image
                   src={product.image}
                   alt={product.name}
@@ -109,26 +102,20 @@ export default function FeaturedProducts() {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
                 <div className="absolute top-3 left-3">
-                  <Badge variant="default" className="text-xs">{product.badge}</Badge>
+                  <span className="inline-flex items-center rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                    {product.badge}
+                  </span>
                 </div>
               </div>
-
-              {/* Content */}
               <div className="p-6 flex flex-col flex-1">
-                <div className="mb-1">
-                  <Badge variant="secondary" className="text-xs">{product.category}</Badge>
-                </div>
-                <h3 className="font-semibold text-[hsl(var(--foreground))] text-lg mt-2 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-[hsl(var(--muted-foreground))] leading-relaxed flex-1">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between mt-5 pt-4 border-t border-[hsl(var(--border))]">
-                  <span className="text-xl font-bold text-[hsl(var(--primary))]">
-                    {formatPrice(product.price)}
-                  </span>
-                  <Button size="sm" variant="outline" asChild>
+                <span className="inline-flex w-fit items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 mb-2">
+                  {product.category}
+                </span>
+                <h3 className="font-semibold text-slate-900 text-lg mt-1 mb-2 leading-snug">{product.name}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed flex-1">{product.description}</p>
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
+                  <span className="text-xl font-bold text-blue-600">{formatPrice(product.price)}</span>
+                  <Button size="sm" variant="outline" asChild className="border-slate-200 text-slate-700 hover:bg-slate-50">
                     <Link href="/login">
                       <Lock className="w-3.5 h-3.5" />
                       View Details
@@ -147,23 +134,11 @@ export default function FeaturedProducts() {
             Create a free account to unlock all products, detailed specifications and exclusive pricing.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              size="lg"
-              variant="outline"
-              asChild
-              className="border-white text-white bg-white/10 hover:bg-white/20"
-            >
+            <Button size="lg" asChild className="bg-white text-blue-700 hover:bg-blue-50 font-semibold">
               <Link href="/register">Create Free Account</Link>
             </Button>
-            <Button
-              size="lg"
-              asChild
-              className="bg-white text-blue-700 hover:bg-blue-50"
-            >
-              <Link href="/login">
-                Sign In
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+            <Button size="lg" variant="outline" asChild className="border-white/40 text-white hover:bg-white/10">
+              <Link href="/login">Sign In <ArrowRight className="w-4 h-4" /></Link>
             </Button>
           </div>
         </div>

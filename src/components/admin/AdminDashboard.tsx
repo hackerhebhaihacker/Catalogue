@@ -58,9 +58,7 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [products, setProducts] = useState(initialProducts);
   const [productModal, setProductModal] = useState(false);
-  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string; name: string }>({
-    open: false, id: "", name: "",
-  });
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: "", name: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyProduct);
   const [saving, setSaving] = useState(false);
@@ -71,13 +69,7 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
   const [savingCat, setSavingCat] = useState(false);
   const { toast } = useToast();
 
-  /* ─── Product CRUD ─── */
-  const openCreate = () => {
-    setEditingId(null);
-    setFormData(emptyProduct);
-    setProductModal(true);
-  };
-
+  const openCreate = () => { setEditingId(null); setFormData(emptyProduct); setProductModal(true); };
   const openEdit = (p: ProductWithCategory) => {
     setEditingId(p.id);
     setFormData({
@@ -94,7 +86,7 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
 
   const saveProduct = async () => {
     if (!formData.product_name.trim() || !formData.description.trim()) {
-      toast({ title: "Validation error", description: "Name and description are required.", variant: "destructive" });
+      toast({ title: "Name and description are required.", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -108,45 +100,23 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
         is_featured: formData.is_featured,
         is_active: formData.is_active,
       };
-
       const url = editingId ? `/api/admin/products/${editingId}` : "/api/admin/products";
       const method = editingId ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed to save product");
-      }
-
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error ?? "Failed"); }
       const { data: saved } = await res.json();
-      const withCategory = {
-        ...saved,
-        categories: catList.find((c) => c.id === saved.category_id) ?? null,
-      } as ProductWithCategory;
-
+      const withCategory = { ...saved, categories: catList.find(c => c.id === saved.category_id) ?? null } as ProductWithCategory;
       if (editingId) {
-        setProducts((prev) => prev.map((p) => (p.id === editingId ? withCategory : p)));
-        toast({ title: "Product updated", variant: "success" as never });
+        setProducts(prev => prev.map(p => p.id === editingId ? withCategory : p));
+        toast({ title: "Product updated successfully." });
       } else {
-        setProducts((prev) => [withCategory, ...prev]);
-        toast({ title: "Product created", variant: "success" as never });
+        setProducts(prev => [withCategory, ...prev]);
+        toast({ title: "Product created successfully." });
       }
-
       setProductModal(false);
     } catch (err: unknown) {
       toast({ title: "Error", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const confirmDelete = (id: string, name: string) => {
-    setDeleteModal({ open: true, id, name });
+    } finally { setSaving(false); }
   };
 
   const deleteProduct = async () => {
@@ -154,67 +124,55 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
     try {
       const res = await fetch(`/api/admin/products/${deleteModal.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
-      setProducts((prev) => prev.filter((p) => p.id !== deleteModal.id));
+      setProducts(prev => prev.filter(p => p.id !== deleteModal.id));
       setDeleteModal({ open: false, id: "", name: "" });
-      toast({ title: "Product deleted", variant: "success" as never });
+      toast({ title: "Product deleted." });
     } catch {
-      toast({ title: "Error", description: "Could not delete product.", variant: "destructive" });
-    } finally {
-      setDeleting(false);
-    }
+      toast({ title: "Could not delete product.", variant: "destructive" });
+    } finally { setDeleting(false); }
   };
 
-  /* ─── Category CRUD ─── */
   const saveCategory = async () => {
-    if (!catForm.category_name.trim()) {
-      toast({ title: "Category name is required", variant: "destructive" });
-      return;
-    }
+    if (!catForm.category_name.trim()) { toast({ title: "Category name is required.", variant: "destructive" }); return; }
     setSavingCat(true);
     try {
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(catForm),
-      });
-      if (!res.ok) throw new Error("Failed to create category");
+      const res = await fetch("/api/admin/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(catForm) });
+      if (!res.ok) throw new Error("Failed");
       const { data } = await res.json();
-      setCatList((prev) => [...prev, data]);
+      setCatList(prev => [...prev, data]);
       setCatForm({ category_name: "", description: "" });
       setCatModal(false);
-      toast({ title: "Category created", variant: "success" as never });
+      toast({ title: "Category created." });
     } catch {
-      toast({ title: "Error creating category", variant: "destructive" });
-    } finally {
-      setSavingCat(false);
-    }
+      toast({ title: "Error creating category.", variant: "destructive" });
+    } finally { setSavingCat(false); }
   };
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "products", label: "Products", icon: Package },
-    { id: "categories", label: "Categories", icon: FolderOpen },
-    { id: "users", label: "Users", icon: Users },
+    { id: "overview",    label: "Overview",    icon: LayoutDashboard },
+    { id: "products",    label: "Products",    icon: Package },
+    { id: "categories",  label: "Categories",  icon: FolderOpen },
+    { id: "users",       label: "Users",       icon: Users },
   ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Header */}
+      {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]">Admin Dashboard</h1>
-        <p className="text-[hsl(var(--muted-foreground))] mt-1">Manage products, categories and users</p>
+        <h1 className="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+        <p className="text-slate-500 mt-1">Manage products, categories and users</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[hsl(var(--muted))] p-1 rounded-xl mb-8 w-fit">
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl mb-8 w-fit overflow-x-auto">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === id
-                ? "bg-white shadow-sm text-[hsl(var(--foreground))]"
-                : "text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
+                ? "bg-white shadow-sm text-slate-900"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -223,53 +181,44 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
         ))}
       </div>
 
-      {/* ── OVERVIEW TAB ── */}
+      {/* ── OVERVIEW ── */}
       {activeTab === "overview" && (
         <div className="space-y-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: "Total Products", value: stats.totalProducts, icon: Package, color: "bg-blue-50 text-blue-600" },
-              { label: "Active Products", value: stats.activeProducts, icon: BarChart3, color: "bg-green-50 text-green-600" },
-              { label: "Featured Products", value: stats.featuredProducts, icon: Package, color: "bg-amber-50 text-amber-600" },
-              { label: "Registered Users", value: stats.totalUsers, icon: Users, color: "bg-purple-50 text-purple-600" },
-            ].map((s) => (
+              { label: "Total Products",    value: stats.totalProducts,    icon: Package,    bg: "bg-blue-50",   text: "text-blue-600"   },
+              { label: "Active Products",   value: stats.activeProducts,   icon: BarChart3,  bg: "bg-green-50",  text: "text-green-600"  },
+              { label: "Featured Products", value: stats.featuredProducts, icon: Package,    bg: "bg-amber-50",  text: "text-amber-600"  },
+              { label: "Registered Users",  value: stats.totalUsers,       icon: Users,      bg: "bg-purple-50", text: "text-purple-600" },
+            ].map(s => (
               <Card key={s.label}>
                 <CardContent className="p-6 flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${s.color}`}>
-                    <s.icon className="w-6 h-6" />
-                  </div>
+                  <div className={`p-3 rounded-xl ${s.bg}`}><s.icon className={`w-6 h-6 ${s.text}`} /></div>
                   <div>
-                    <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{s.value}</p>
-                    <p className="text-sm text-[hsl(var(--muted-foreground))]">{s.label}</p>
+                    <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+                    <p className="text-sm text-slate-500">{s.label}</p>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Recent products */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Recent Products</CardTitle>
               <Button size="sm" onClick={() => setActiveTab("products")}>View All</Button>
             </CardHeader>
             <CardContent>
-              <div className="divide-y divide-[hsl(var(--border))]">
-                {products.slice(0, 5).map((p) => (
+              <div className="divide-y divide-slate-100">
+                {products.slice(0, 5).map(p => (
                   <div key={p.id} className="flex items-center justify-between py-3">
                     <div>
-                      <p className="font-medium text-sm text-[hsl(var(--foreground))]">{p.product_name}</p>
-                      <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                        {p.categories?.category_name ?? "Uncategorised"}
-                      </p>
+                      <p className="font-medium text-sm text-slate-900">{p.product_name}</p>
+                      <p className="text-xs text-slate-500">{p.categories?.category_name ?? "Uncategorised"}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={p.is_active ? "success" : "secondary"}>
-                        {p.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                      {p.price != null && (
-                        <span className="text-sm font-medium">{formatPrice(p.price)}</span>
-                      )}
+                      <Badge variant={p.is_active ? "success" : "secondary"}>{p.is_active ? "Active" : "Inactive"}</Badge>
+                      {p.price != null && <span className="text-sm font-medium text-slate-700">{formatPrice(p.price)}</span>}
                     </div>
                   </div>
                 ))}
@@ -277,23 +226,20 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
             </CardContent>
           </Card>
 
-          {/* Recent users */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Recent Users</CardTitle>
               <Button size="sm" onClick={() => setActiveTab("users")}>View All</Button>
             </CardHeader>
             <CardContent>
-              <div className="divide-y divide-[hsl(var(--border))]">
-                {users.slice(0, 5).map((u) => (
+              <div className="divide-y divide-slate-100">
+                {users.slice(0, 5).map(u => (
                   <div key={u.id} className="flex items-center justify-between py-3">
                     <div>
-                      <p className="font-medium text-sm text-[hsl(var(--foreground))]">{u.full_name}</p>
-                      <p className="text-xs text-[hsl(var(--muted-foreground))]">{u.email}</p>
+                      <p className="font-medium text-sm text-slate-900">{u.full_name}</p>
+                      <p className="text-xs text-slate-500">{u.email}</p>
                     </div>
-                    <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                      {u.role}
-                    </Badge>
+                    <Badge variant={u.role === "admin" ? "default" : "secondary"}>{u.role}</Badge>
                   </div>
                 ))}
               </div>
@@ -302,46 +248,36 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
         </div>
       )}
 
-      {/* ── PRODUCTS TAB ── */}
+      {/* ── PRODUCTS ── */}
       {activeTab === "products" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[hsl(var(--foreground))]">
-              Products ({products.length})
-            </h2>
-            <Button onClick={openCreate}>
-              <Plus className="w-4 h-4" />
-              Add Product
-            </Button>
+            <h2 className="text-xl font-semibold text-slate-900">Products ({products.length})</h2>
+            <Button onClick={openCreate}><Plus className="w-4 h-4" />Add Product</Button>
           </div>
-
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)]">
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Product</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Category</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Price</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Status</th>
-                      <th className="text-right py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Actions</th>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Product</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Category</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Price</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Status</th>
+                      <th className="text-right py-3 px-4 font-semibold text-slate-500">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[hsl(var(--border))]">
-                    {products.map((p) => (
-                      <tr key={p.id} className="hover:bg-[hsl(var(--muted)/0.3)] transition-colors">
+                  <tbody className="divide-y divide-slate-100">
+                    {products.map(p => (
+                      <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[hsl(var(--foreground))]">{p.product_name}</div>
-                          <div className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5 truncate max-w-xs">
-                            {p.description.slice(0, 60)}…
-                          </div>
+                          <div className="font-medium text-slate-900">{p.product_name}</div>
+                          <div className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">{p.description.slice(0, 55)}…</div>
                         </td>
-                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))]">
-                          {p.categories?.category_name ?? "—"}
-                        </td>
-                        <td className="py-3 px-4">
-                          {p.price != null ? formatPrice(p.price) : <span className="text-[hsl(var(--muted-foreground))]">—</span>}
+                        <td className="py-3 px-4 text-slate-500">{p.categories?.category_name ?? "—"}</td>
+                        <td className="py-3 px-4 font-medium text-slate-700">
+                          {p.price != null ? formatPrice(p.price) : <span className="text-slate-400">—</span>}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex flex-col gap-1">
@@ -352,16 +288,11 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
                           </div>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => openEdit(p)}>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(p)} className="text-slate-600 hover:text-slate-900">
                               <Pencil className="w-4 h-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-[hsl(var(--destructive))] hover:text-[hsl(var(--destructive))]"
-                              onClick={() => confirmDelete(p.id, p.product_name)}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => setDeleteModal({ open: true, id: p.id, name: p.product_name })} className="text-red-400 hover:text-red-600">
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -369,11 +300,7 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
                       </tr>
                     ))}
                     {products.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center text-[hsl(var(--muted-foreground))]">
-                          No products yet. Click "Add Product" to get started.
-                        </td>
-                      </tr>
+                      <tr><td colSpan={5} className="py-12 text-center text-slate-400">No products yet. Click "Add Product" to get started.</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -383,83 +310,60 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
         </div>
       )}
 
-      {/* ── CATEGORIES TAB ── */}
+      {/* ── CATEGORIES ── */}
       {activeTab === "categories" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-[hsl(var(--foreground))]">
-              Categories ({catList.length})
-            </h2>
-            <Button onClick={() => setCatModal(true)}>
-              <Plus className="w-4 h-4" />
-              Add Category
-            </Button>
+            <h2 className="text-xl font-semibold text-slate-900">Categories ({catList.length})</h2>
+            <Button onClick={() => setCatModal(true)}><Plus className="w-4 h-4" />Add Category</Button>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {catList.map((cat) => (
+            {catList.map(cat => (
               <Card key={cat.id} className="hover:shadow-sm transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-[hsl(var(--primary)/0.1)] rounded-lg">
-                      <FolderOpen className="w-5 h-5 text-[hsl(var(--primary))]" />
-                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg shrink-0"><FolderOpen className="w-5 h-5 text-blue-600" /></div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-[hsl(var(--foreground))]">{cat.category_name}</p>
-                      {cat.description && (
-                        <p className="text-xs text-[hsl(var(--muted-foreground))] mt-0.5 truncate">
-                          {cat.description}
-                        </p>
-                      )}
-                      <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1">
-                        {products.filter((p) => p.category_id === cat.id).length} products
-                      </p>
+                      <p className="font-medium text-slate-900">{cat.category_name}</p>
+                      {cat.description && <p className="text-xs text-slate-500 mt-0.5 truncate">{cat.description}</p>}
+                      <p className="text-xs text-slate-400 mt-1">{products.filter(p => p.category_id === cat.id).length} products</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
-            {catList.length === 0 && (
-              <div className="col-span-3 py-12 text-center text-[hsl(var(--muted-foreground))]">
-                No categories yet.
-              </div>
-            )}
+            {catList.length === 0 && <div className="col-span-3 py-12 text-center text-slate-400">No categories yet.</div>}
           </div>
         </div>
       )}
 
-      {/* ── USERS TAB ── */}
+      {/* ── USERS ── */}
       {activeTab === "users" && (
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-[hsl(var(--foreground))]">
-            Registered Users ({users.length})
-          </h2>
+          <h2 className="text-xl font-semibold text-slate-900">Registered Users ({users.length})</h2>
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.5)]">
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Name</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Email</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Mobile</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Role</th>
-                      <th className="text-left py-3 px-4 font-semibold text-[hsl(var(--muted-foreground))]">Joined</th>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Name</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Email</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Mobile</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Role</th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-500">Joined</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[hsl(var(--border))]">
-                    {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-[hsl(var(--muted)/0.3)] transition-colors">
-                        <td className="py-3 px-4 font-medium text-[hsl(var(--foreground))]">{u.full_name}</td>
-                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))]">{u.email}</td>
-                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))]">{u.mobile_number ?? "—"}</td>
+                  <tbody className="divide-y divide-slate-100">
+                    {users.map(u => (
+                      <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-4 font-medium text-slate-900">{u.full_name}</td>
+                        <td className="py-3 px-4 text-slate-500">{u.email}</td>
+                        <td className="py-3 px-4 text-slate-500">{u.mobile_number ?? "—"}</td>
                         <td className="py-3 px-4">
-                          <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                            {u.role}
-                          </Badge>
+                          <Badge variant={u.role === "admin" ? "default" : "secondary"}>{u.role}</Badge>
                         </td>
-                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))]">
-                          {formatDate(u.created_at)}
-                        </td>
+                        <td className="py-3 px-4 text-slate-500">{formatDate(u.created_at)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -480,84 +384,40 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label htmlFor="p-name">Product Name *</Label>
-              <Input
-                id="p-name"
-                value={formData.product_name}
-                onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
-                placeholder="e.g. Premium Wireless Headphones"
-              />
+              <Input id="p-name" value={formData.product_name} onChange={e => setFormData({ ...formData, product_name: e.target.value })} placeholder="e.g. Premium Wireless Headphones" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="p-desc">Description *</Label>
-              <Textarea
-                id="p-desc"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                placeholder="Detailed product description…"
-              />
+              <Textarea id="p-desc" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Detailed product description…" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="p-cat">Category</Label>
-                <Select
-                  value={formData.category_id || "none"}
-                  onValueChange={(v) => setFormData({ ...formData, category_id: v === "none" ? "" : v })}
-                >
-                  <SelectTrigger id="p-cat">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
+                <Select value={formData.category_id || "none"} onValueChange={v => setFormData({ ...formData, category_id: v === "none" ? "" : v })}>
+                  <SelectTrigger id="p-cat"><SelectValue placeholder="Select category" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
-                    {catList.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.category_name}
-                      </SelectItem>
-                    ))}
+                    {catList.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.category_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="p-price">Price (USD)</Label>
-                <Input
-                  id="p-price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  placeholder="0.00"
-                />
+                <Label htmlFor="p-price">Price (₹)</Label>
+                <Input id="p-price" type="number" min="0" step="1" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} placeholder="0" />
               </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="p-img">Image URL</Label>
-              <Input
-                id="p-img"
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                placeholder="https://images.unsplash.com/…"
-              />
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                Use an Unsplash URL or paste any image link.
-              </p>
+              <Input id="p-img" type="url" value={formData.image_url} onChange={e => setFormData({ ...formData, image_url: e.target.value })} placeholder="https://images.unsplash.com/…" />
+              <p className="text-xs text-slate-400">Use an Unsplash URL or any public image link.</p>
             </div>
             <div className="flex gap-6">
               <div className="flex items-center gap-2">
-                <Checkbox
-                  id="p-featured"
-                  checked={formData.is_featured}
-                  onCheckedChange={(c) => setFormData({ ...formData, is_featured: !!c })}
-                />
+                <Checkbox id="p-featured" checked={formData.is_featured} onCheckedChange={c => setFormData({ ...formData, is_featured: !!c })} />
                 <Label htmlFor="p-featured" className="font-normal cursor-pointer">Featured</Label>
               </div>
               <div className="flex items-center gap-2">
-                <Checkbox
-                  id="p-active"
-                  checked={formData.is_active}
-                  onCheckedChange={(c) => setFormData({ ...formData, is_active: !!c })}
-                />
+                <Checkbox id="p-active" checked={formData.is_active} onCheckedChange={c => setFormData({ ...formData, is_active: !!c })} />
                 <Label htmlFor="p-active" className="font-normal cursor-pointer">Active</Label>
               </div>
             </div>
@@ -565,30 +425,27 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setProductModal(false)}>Cancel</Button>
             <Button onClick={saveProduct} disabled={saving}>
-              {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save Product"}
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : "Save Product"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ── DELETE CONFIRM MODAL ── */}
-      <Dialog open={deleteModal.open} onOpenChange={(o) => !o && setDeleteModal({ open: false, id: "", name: "" })}>
+      {/* ── DELETE CONFIRM ── */}
+      <Dialog open={deleteModal.open} onOpenChange={o => !o && setDeleteModal({ open: false, id: "", name: "" })}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[hsl(var(--destructive))]">
-              <AlertTriangle className="w-5 h-5" />
-              Delete Product
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />Delete Product
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <strong>{deleteModal.name}</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{deleteModal.name}</strong>? This cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDeleteModal({ open: false, id: "", name: "" })}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setDeleteModal({ open: false, id: "", name: "" })}>Cancel</Button>
             <Button variant="destructive" onClick={deleteProduct} disabled={deleting}>
-              {deleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting…</> : "Delete"}
+              {deleting ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting…</> : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -604,27 +461,17 @@ export default function AdminDashboard({ initialProducts, categories, users, sta
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label htmlFor="cat-name">Category Name *</Label>
-              <Input
-                id="cat-name"
-                value={catForm.category_name}
-                onChange={(e) => setCatForm({ ...catForm, category_name: e.target.value })}
-                placeholder="e.g. Electronics"
-              />
+              <Input id="cat-name" value={catForm.category_name} onChange={e => setCatForm({ ...catForm, category_name: e.target.value })} placeholder="e.g. Electronics" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="cat-desc">Description</Label>
-              <Input
-                id="cat-desc"
-                value={catForm.description}
-                onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
-                placeholder="Optional description"
-              />
+              <Input id="cat-desc" value={catForm.description} onChange={e => setCatForm({ ...catForm, description: e.target.value })} placeholder="Optional description" />
             </div>
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setCatModal(false)}>Cancel</Button>
             <Button onClick={saveCategory} disabled={savingCat}>
-              {savingCat ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : "Save Category"}
+              {savingCat ? <><Loader2 className="w-4 h-4 animate-spin" />Saving…</> : "Save Category"}
             </Button>
           </DialogFooter>
         </DialogContent>

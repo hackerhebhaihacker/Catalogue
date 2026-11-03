@@ -20,7 +20,7 @@ export default async function DashboardPage() {
     .single();
 
   return (
-    <div className="min-h-screen pt-16 bg-[hsl(var(--muted)/0.3)]">
+    <div className="min-h-screen pt-16 bg-slate-50">
       <UserDashboard profile={profile} />
     </div>
   );

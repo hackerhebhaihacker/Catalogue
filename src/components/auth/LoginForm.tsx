@@ -48,7 +48,6 @@ export default function LoginForm() {
       email: data.email,
       password: data.password,
     });
-
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
         setServerError("Incorrect email or password. Please try again.");
@@ -59,7 +58,6 @@ export default function LoginForm() {
       }
       return;
     }
-
     router.push(redirectTo);
     router.refresh();
   };
@@ -69,17 +67,12 @@ export default function LoginForm() {
     const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
-
-    if (error) {
-      setServerError(error.message);
-      return;
-    }
-
+    if (error) { setServerError(error.message); return; }
     setResetSent(true);
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-[hsl(var(--border))] overflow-hidden">
+    <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-7 text-white text-center">
         <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3">
@@ -94,7 +87,7 @@ export default function LoginForm() {
       </div>
 
       <div className="px-8 py-8">
-        {/* Registered success message */}
+        {/* Success banner */}
         {registered && mode === "login" && (
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700 mb-5">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -102,160 +95,94 @@ export default function LoginForm() {
           </div>
         )}
 
-        {/* ── LOGIN FORM ── */}
+        {/* ── LOGIN ── */}
         {mode === "login" && (
           <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="jane@example.com"
-                {...loginForm.register("email")}
-                aria-describedby="email-error"
-              />
+              <Input id="email" type="email" placeholder="you@example.com" {...loginForm.register("email")} />
               {loginForm.formState.errors.email && (
-                <p id="email-error" className="text-xs text-[hsl(var(--destructive))]" role="alert">
-                  {loginForm.formState.errors.email.message}
-                </p>
+                <p className="text-xs text-red-500" role="alert">{loginForm.formState.errors.email.message}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <button
-                  type="button"
-                  onClick={() => setMode("reset")}
-                  className="text-xs text-[hsl(var(--primary))] hover:underline"
-                >
+                <button type="button" onClick={() => setMode("reset")} className="text-xs text-blue-600 hover:underline">
                   Forgot password?
                 </button>
               </div>
               <div className="relative">
-                <Input
-                  id="password"
-                  type={showPw ? "text" : "password"}
-                  placeholder="Your password"
-                  {...loginForm.register("password")}
-                  className="pr-10"
-                  aria-describedby="password-error"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                  aria-label={showPw ? "Hide password" : "Show password"}
-                >
+                <Input id="password" type={showPw ? "text" : "password"} placeholder="Your password" {...loginForm.register("password")} className="pr-10" />
+                <button type="button" onClick={() => setShowPw(!showPw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  aria-label={showPw ? "Hide password" : "Show password"}>
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {loginForm.formState.errors.password && (
-                <p id="password-error" className="text-xs text-[hsl(var(--destructive))]" role="alert">
-                  {loginForm.formState.errors.password.message}
-                </p>
+                <p className="text-xs text-red-500" role="alert">{loginForm.formState.errors.password.message}</p>
               )}
             </div>
 
             <div className="flex items-center gap-2">
-              <Checkbox
-                id="rememberMe"
-                onCheckedChange={(c) => loginForm.setValue("rememberMe", !!c)}
-              />
-              <Label htmlFor="rememberMe" className="font-normal text-sm cursor-pointer">
-                Remember me
-              </Label>
+              <Checkbox id="rememberMe" onCheckedChange={c => loginForm.setValue("rememberMe", !!c)} />
+              <Label htmlFor="rememberMe" className="font-normal text-sm cursor-pointer text-slate-600">Remember me</Label>
             </div>
 
             {serverError && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700" role="alert">
-                {serverError}
-              </div>
+              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700" role="alert">{serverError}</div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loginForm.formState.isSubmitting}
-              size="lg"
-            >
-              {loginForm.formState.isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                "Sign In"
-              )}
+            <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loginForm.formState.isSubmitting}>
+              {loginForm.formState.isSubmitting
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Signing in…</>
+                : "Sign In"}
             </Button>
 
-            <p className="text-center text-sm text-[hsl(var(--muted-foreground))]">
-              Don't have an account?{" "}
-              <Link href="/register" className="text-[hsl(var(--primary))] font-medium hover:underline">
-                Register now
-              </Link>
+            <p className="text-center text-sm text-slate-500">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-blue-600 font-medium hover:underline">Register now</Link>
             </p>
           </form>
         )}
 
-        {/* ── RESET FORM ── */}
+        {/* ── RESET ── */}
         {mode === "reset" && (
-          <>
-            {resetSent ? (
-              <div className="text-center py-6 space-y-3">
-                <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="w-7 h-7 text-green-500" />
-                </div>
-                <h3 className="font-semibold text-[hsl(var(--foreground))]">Check your inbox</h3>
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  We've sent a password reset link to your email address.
-                </p>
-                <Button variant="outline" size="sm" onClick={() => { setMode("login"); setResetSent(false); }}>
-                  Back to Sign In
-                </Button>
+          resetSent ? (
+            <div className="text-center py-6 space-y-4">
+              <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-7 h-7 text-green-500" />
               </div>
-            ) : (
-              <form onSubmit={resetForm.handleSubmit(onReset)} className="space-y-5" noValidate>
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                  Enter your email address and we'll send you a link to reset your password.
-                </p>
-                <div className="space-y-1.5">
-                  <Label htmlFor="reset-email">Email Address</Label>
-                  <Input
-                    id="reset-email"
-                    type="email"
-                    placeholder="jane@example.com"
-                    {...resetForm.register("email")}
-                  />
-                  {resetForm.formState.errors.email && (
-                    <p className="text-xs text-[hsl(var(--destructive))]" role="alert">
-                      {resetForm.formState.errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                {serverError && (
-                  <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700" role="alert">
-                    {serverError}
-                  </div>
+              <h3 className="font-semibold text-slate-900">Check your inbox</h3>
+              <p className="text-sm text-slate-500">We&apos;ve sent a password reset link to your email address.</p>
+              <Button variant="outline" size="sm" onClick={() => { setMode("login"); setResetSent(false); }}>
+                Back to Sign In
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={resetForm.handleSubmit(onReset)} className="space-y-5" noValidate>
+              <p className="text-sm text-slate-500">Enter your email and we&apos;ll send you a link to reset your password.</p>
+              <div className="space-y-1.5">
+                <Label htmlFor="reset-email">Email Address</Label>
+                <Input id="reset-email" type="email" placeholder="you@example.com" {...resetForm.register("email")} />
+                {resetForm.formState.errors.email && (
+                  <p className="text-xs text-red-500" role="alert">{resetForm.formState.errors.email.message}</p>
                 )}
-
-                <Button type="submit" className="w-full" disabled={resetForm.formState.isSubmitting} size="lg">
-                  {resetForm.formState.isSubmitting ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />Sending…</>
-                  ) : "Send Reset Link"}
-                </Button>
-
-                <button
-                  type="button"
-                  onClick={() => { setMode("login"); setServerError(null); }}
-                  className="w-full text-center text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                >
-                  ← Back to Sign In
-                </button>
-              </form>
-            )}
-          </>
+              </div>
+              {serverError && (
+                <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700" role="alert">{serverError}</div>
+              )}
+              <Button type="submit" className="w-full h-11 font-semibold" disabled={resetForm.formState.isSubmitting}>
+                {resetForm.formState.isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Sending…</> : "Send Reset Link"}
+              </Button>
+              <button type="button" onClick={() => { setMode("login"); setServerError(null); }}
+                className="w-full text-center text-sm text-slate-400 hover:text-slate-600">
+                ← Back to Sign In
+              </button>
+            </form>
+          )
         )}
       </div>
     </div>
